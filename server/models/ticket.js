@@ -69,7 +69,7 @@ const TicketSchema = new mongoose.Schema(
       enum: ['New', 'In Progress', 'Dispatched', 'Closed', 'Cancelled'],
       default: 'New',
     },
-s   assignedTo: {
+    assignedTo: {  
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User', // This will link to an Admin user
       default: null,
