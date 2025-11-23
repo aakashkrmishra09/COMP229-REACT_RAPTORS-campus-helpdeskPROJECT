@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import SubmitTicket from "./pages/SubmitTicket";
 import Tickets from "./pages/Tickets"; 
+import Home from "./pages/Home";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -20,7 +21,7 @@ function App() {
       <div style={{ padding: "20px" }}>
         <Routes>
           {/* Default route "/" goes to Login if not logged in, SubmitTicket if logged in */}
-          <Route path="/" element={token ? <Navigate to="/submit-ticket" /> : <Navigate to="/login" />} />
+          <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route
