@@ -1,100 +1,75 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// src/pages/SubmitTicket.js
+import React, { useState } from "react";
+import { getToken } from "../utils/authService";
+import API_BASE_URL from "../config";
 
-function SubmitTicket() {
-  const navigate = useNavigate();
+export default function SubmitTicket() {
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    category: "",
+    priority: "Medium",
+  });
 
-  // Form state
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  // Protect page — must be authenticated
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-    }
-  }, [navigate]);
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!title || !description) {
-      setError("All fields are required.");
+    const token = getToken();
+    if (!token) {
+      alert("You must be logged in to submit a ticket.");
       return;
     }
 
-    const token = localStorage.getItem("token");
+    console.log("Submitting ticket:", form);
 
     try {
-      const response = await fetch("http://localhost:5000/api/tickets", {
+      const res = await fetch(`${API_BASE_URL}/api/tickets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "x-auth-token": token, // send token to backend
         },
-        body: JSON.stringify({
-          title,
-          description,
-        }),
+        body: JSON.stringify(form),
       });
 
-      if (!response.ok) {
-        setError("Failed to submit ticket. Check your backend.");
+      const text = await res.text();
+      if (!res.ok) {
+        console.error("Ticket submission failed:", text);
+        alert("Ticket submission failed. See console.");
         return;
       }
 
-      setSuccess("Ticket Submitted Successfully!");
-      setTitle("");
-      setDescription("");
-      setError("");
-
-      // Optional: redirect to ticket list
-      // navigate("/tickets");
-
+      const data = JSON.parse(text);
+      console.log("Ticket created successfully:", data);
+      alert(`Ticket submitted! Ticket Number: ${data.ticketNumber}`);
+      setForm({ title: "", description: "", category: "", priority: "Medium" }); // reset form
     } catch (err) {
-      console.error(err);
-      setError("Something went wrong.");
+      console.error("Submit ticket error:", err);
     }
   };
 
   return (
-    <div className="container">
-      <h2>Submit a Support Ticket</h2>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {success && <p style={{ color: "green" }}>{success}</p>}
-
-      <form onSubmit={handleSubmit} style={{ maxWidth: "400px" }}>
-        <div>
-          <label>Title:</label>
-          <input
-            type="text"
-            placeholder="Enter ticket title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="input"
-          />
-        </div>
-
-        <div>
-          <label>Description:</label>
-          <textarea
-            placeholder="Describe the issue"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="textarea"
-          />
-        </div>
-
-        <button type="submit" className="btn">
-          Submit Ticket
-        </button>
+    <div>
+      <h2>Submit a Ticket</h2>
+      <form onSubmit={handleSubmit}>
+        <input name="title" placeholder="Title" value={form.title} onChange={handleChange} required />
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={form.description}
+          onChange={handleChange}
+          required
+        />
+        <input name="category" placeholder="Category" value={form.category} onChange={handleChange} required />
+        <select name="priority" value={form.priority} onChange={handleChange}>
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+          <option>Critical</option>
+        </select>
+        <button type="submit">Submit Ticket</button>
       </form>
     </div>
   );
 }
-
-export default SubmitTicket;

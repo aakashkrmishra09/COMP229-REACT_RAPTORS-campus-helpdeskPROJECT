@@ -1,33 +1,61 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API_BASE_URL from "../config";
 
 export default function Register() {
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    userType: "student"
+  });
+  const navigate = useNavigate();
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("Submitting registration:", form); // <-- log payload
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    console.log("Raw response:", res); // <-- log response object
+    const text = await res.text();
+    console.log("Raw response text:", text); // <-- log raw body
+
+    if (!res.ok) {
+      console.error("Registration failed:", text);
+      alert("Registration failed. See console.");
+      return;
+    }
+
+    const data = JSON.parse(text);
+    console.log("Registration success data:", data); // <-- log parsed token
+    localStorage.setItem("token", data.token);
+    alert("Registration successful!");
+  } catch (err) {
+    console.error("Register error:", err);
+  }
+  };
+
   return (
-    <div style={{ fontFamily: "Arial", background: "#eef2f3", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-      <form style={{ background: "white", padding: "30px", borderRadius: "10px", width: "300px", boxShadow: "0 0 10px rgba(0,0,0,0.1)" }}>
-        <h2>Register</h2>
-        <label>Full Name</label>
-        <input type="text" required style={{ width: "100%", padding: "8px", margin: "10px 0" }} />
-
-        <label>Email</label>
-        <input type="email" required style={{ width: "100%", padding: "8px", margin: "10px 0" }} />
-
-        <label>Password</label>
-        <input type="password" required style={{ width: "100%", padding: "8px", margin: "10px 0" }} />
-
-        <label>Role</label>
-        <select style={{ width: "100%", padding: "8px", margin: "10px 0" }}>
-          <option value="">Select Role</option>
-          <option value="student">Student</option>
-          <option value="staff">Staff</option>
-          <option value="agent">Support Agent</option>
+    <div>
+      <h2>Register</h2>
+      <form onSubmit={handleSubmit}>
+        <input name="username" placeholder="Username" onChange={handleChange} required />
+        <input name="email" placeholder="Email" onChange={handleChange} required />
+        <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
+        <select name="userType" onChange={handleChange}>
+          <option>student</option>
+          <option>staff</option>
+          <option>admin</option>
         </select>
-
-        <button type="submit" style={{ background: "#007bff", color: "white", border: "none", padding: "10px", width: "100%", borderRadius: "5px" }}>Sign Up</button>
-
-        <p style={{ textAlign: "center", marginTop: "10px" }}>
-          Already have an account? <Link to="/login">Login</Link>
-        </p>
+        <button type="submit">Register</button>
       </form>
     </div>
   );
