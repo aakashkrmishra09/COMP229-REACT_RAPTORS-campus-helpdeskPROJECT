@@ -1,9 +1,10 @@
 // src/pages/SubmitTicket.js
 import React, { useState } from "react";
-import { getToken } from "../utils/authService";
-import API_BASE_URL from "../config";
+import { useNavigate } from "react-router-dom";
+import { addTicket } from "../utils/TicketStore";
 
 export default function SubmitTicket() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -11,49 +12,41 @@ export default function SubmitTicket() {
     priority: "Medium",
   });
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const token = getToken();
-    if (!token) {
-      alert("You must be logged in to submit a ticket.");
-      return;
-    }
-
-    console.log("Submitting ticket:", form);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/tickets`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-auth-token": token, // send token to backend
-        },
-        body: JSON.stringify(form),
-      });
+      const newTicket = addTicket(form); // add ticket for logged-in user
+      alert(`Ticket submitted! Ticket Number: ${newTicket.id}`);
 
-      const text = await res.text();
-      if (!res.ok) {
-        console.error("Ticket submission failed:", text);
-        alert("Ticket submission failed. See console.");
-        return;
-      }
+      // Reset form
+      setForm({ title: "", description: "", category: "", priority: "Medium" });
 
-      const data = JSON.parse(text);
-      console.log("Ticket created successfully:", data);
-      alert(`Ticket submitted! Ticket Number: ${data.ticketNumber}`);
-      setForm({ title: "", description: "", category: "", priority: "Medium" }); // reset form
+      // Redirect to tickets list
+      navigate("/tickets");
     } catch (err) {
-      console.error("Submit ticket error:", err);
+      console.error(err);
+      alert(err.message); // shows "User not logged in" if token missing
     }
   };
 
   return (
-    <div>
+    <div style={{ padding: 20 }}>
       <h2>Submit a Ticket</h2>
-      <form onSubmit={handleSubmit}>
-        <input name="title" placeholder="Title" value={form.title} onChange={handleChange} required />
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: 10 }}
+      >
+        <input
+          name="title"
+          placeholder="Title"
+          value={form.title}
+          onChange={handleChange}
+          required
+        />
         <textarea
           name="description"
           placeholder="Description"
@@ -61,7 +54,13 @@ export default function SubmitTicket() {
           onChange={handleChange}
           required
         />
-        <input name="category" placeholder="Category" value={form.category} onChange={handleChange} required />
+        <input
+          name="category"
+          placeholder="Category"
+          value={form.category}
+          onChange={handleChange}
+          required
+        />
         <select name="priority" value={form.priority} onChange={handleChange}>
           <option>Low</option>
           <option>Medium</option>

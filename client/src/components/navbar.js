@@ -16,6 +16,7 @@ export default function Navbar() {
       {!token && <Link to="/login" style={{ marginRight: "10px" }}>Login</Link>}
       {!token && <Link to="/register">Register</Link>}
       {token && <Link to="/submit-ticket" style={{ marginRight: "10px" }}>Submit Ticket</Link>}
+      {token && <Link to="/tickets" style={{ marginRight: "10px" }}>My Tickets</Link>}
       {token && <button onClick={handleLogout}>Logout</button>}
     </nav>
   );

@@ -4,6 +4,7 @@ import Navbar from "./components/navbar";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import SubmitTicket from "./pages/SubmitTicket";
+import Tickets from "./pages/Tickets"; 
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -27,6 +28,14 @@ function App() {
             element={
               <PrivateRoute>
                 <SubmitTicket />
+              </PrivateRoute>
+            }
+          />
+           <Route
+            path="/tickets"
+            element={
+              <PrivateRoute>
+                <Tickets />
               </PrivateRoute>
             }
           />
