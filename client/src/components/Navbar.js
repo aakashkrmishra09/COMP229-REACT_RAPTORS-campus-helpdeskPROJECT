@@ -1,6 +1,6 @@
-// client/src/components/Navbar.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import logo from '../logo.jpg'; 
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -13,31 +13,24 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <nav className="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
       <div className="container">
-        <Link className="navbar-brand" to="/">Help Desk</Link>
+        <Link className="navbar-brand d-flex align-items-center" to="/">
+          <img src={logo} alt="Logo" width="40" height="40" className="rounded-circle me-3 border border-light" />
+          <span className="fw-bold" style={{letterSpacing: '1px'}}>REACT <span style={{color: '#ff6600'}}>RAPTORS</span></span>
+        </Link>
+        
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav ms-auto">
             {token ? (
               <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/dashboard">Dashboard</Link>
-                </li>
-                <li className="nav-item">
-                  <button onClick={handleLogout} className="btn btn-link nav-link">
-                    Logout
-                  </button>
-                </li>
+                <li className="nav-item"><Link className="nav-link text-light mx-2" to="/dashboard">Dashboard</Link></li>
+                <li className="nav-item"><button onClick={handleLogout} className="btn btn-outline-light btn-sm ms-2">Logout</button></li>
               </>
             ) : (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/login">Login</Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/register">Register</Link>
-                </li>
-              </>
+              <li className="nav-item">
+                <Link className="btn btn-sm btn-primary px-4" to="/login">Login</Link>
+              </li>
             )}
           </ul>
         </div>

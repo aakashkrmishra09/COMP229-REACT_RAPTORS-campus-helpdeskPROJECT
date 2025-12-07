@@ -1,38 +1,197 @@
-.App {
-  text-align: center;
+/* client/src/App.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+:root {
+  --neon-blue: #00f2ff;
+  --neon-orange: #ff6600;
+  --bg-dark: #030014;       /* Deep space black-blue */
+  --card-glass: rgba(17, 25, 40, 0.75);
+  --border-glass: rgba(255, 255, 255, 0.125);
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
 }
 
-.App-logo {
-  height: 40vmin;
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden; /* Prevents scrollbars from the background effects */
+}
+
+/* --- 1. THE RAPTOR WATERMARK --- */
+/* This puts your logo huge and faint in the center */
+body::after {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70vh;
+  height: 70vh;
+  background-image: url('./logo.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.08; /* Very subtle */
+  z-index: -2;
+  filter: grayscale(100%);
+}
+
+/* --- 2. BACKGROUND GLOWS (The "Beautiful Things") --- */
+/* This creates the purple/blue glow from your reference image */
+body::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: 20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 242, 255, 0.15), transparent 70%);
+  filter: blur(80px);
+  z-index: -1;
+  animation: float 10s ease-in-out infinite;
+}
+
+.glow-orange {
+  position: absolute;
+  bottom: -10%;
+  right: 10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255, 102, 0, 0.1), transparent 70%);
+  filter: blur(80px);
+  z-index: -1;
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+/* --- 3. GLASS CARD (The "Dimension" Look) --- */
+.custom-card {
+  background: var(--card-glass);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  margin-top: 4rem;
+}
+
+/* --- 4. TYPOGRAPHY --- */
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Gradient text effect like the "Dimension" title */
+.text-gradient {
+  background: linear-gradient(135deg, #fff 30%, var(--neon-blue) 100%);
+  -webkit-background-clip: text;
+  background-clip: text; /* Add this to remove the yellow line */
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* --- 5. MODERN INPUTS --- */
+.form-control, .form-select {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white !important;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.form-control:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 0 4px rgba(0, 242, 255, 0.1);
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* --- 6. BUTTONS --- */
+.btn-primary {
+  background: linear-gradient(90deg, #2563eb, #00f2ff);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px 0 rgba(0, 242, 255, 0.39);
+  transition: transform 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 242, 255, 0.23);
+}
+
+/* --- 7. NAVBAR --- */
+.navbar-custom {
+  background: rgba(3, 0, 20, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- 8. TABLE STYLES --- */
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--text-muted);
+  border-color: rgba(255,255,255,0.05);
+}
+.table thead th {
   color: white;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.table tbody td {
+  vertical-align: middle;
+  padding: 1rem 0.5rem;
+}
+.badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.table {
+  --bs-table-color: white !important;
+  --bs-table-bg: transparent !important;
 }
 
-.App-link {
-  color: #61dafb;
+.table td, .table th {
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Fix for the white stripes */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  --bs-table-accent-bg: transparent !important;
+  color: white !important;
+}
+/* FORCE ALL TEXT TO BE LIGHT */
+p, label, span, input {
+  color: white !important;
+}
+
+/* Make placeholders slightly grey but visible */
+::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+  opacity: 1;
+}
+
+/* Ensure the input text you type is bright white */
+.form-control {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
