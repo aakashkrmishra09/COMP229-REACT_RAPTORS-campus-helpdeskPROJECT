@@ -1,12 +1,15 @@
+// server/routes/auth.js
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const auth = require('../middleware/auth'); // Importing the middleware we just made
 const User = require('../models/user');
+require('dotenv').config();
 
 // @route   POST api/auth/register
-// @desc    Register a user
+// @desc    Register user
+// @access  Public
 router.post('/register', async (req, res) => {
   const { username, email, password, userType } = req.body;
 
@@ -20,27 +23,20 @@ router.post('/register', async (req, res) => {
       username,
       email,
       password,
-      userType,
+      userType: userType || 'student' 
     });
 
-    // Encrypt password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
 
     await user.save();
 
-    // Return jsonwebtoken
-    const payload = {
-      user: {
-        id: user.id,
-        userType: user.userType,
-      },
-    };
+    const payload = { user: { id: user.id } };
 
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: 3600 }, // 1 hour
+      { expiresIn: 360000 },
       (err, token) => {
         if (err) throw err;
         res.json({ token });
@@ -48,12 +44,13 @@ router.post('/register', async (req, res) => {
     );
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send('Server Error');
   }
 });
 
 // @route   POST api/auth/login
 // @desc    Authenticate user & get token
+// @access  Public
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -68,25 +65,41 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: 'Invalid Credentials' });
     }
 
-    const payload = {
-      user: {
-        id: user.id,
-        userType: user.userType,
-      },
-    };
+    const payload = { user: { id: user.id } };
 
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: 3600 },
+      { expiresIn: 360000 },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({ 
+            token, 
+            user: { 
+                id: user.id, 
+                username: user.username, 
+                email: user.email,
+                userType: user.userType 
+            } 
+        });
       }
     );
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route   GET api/auth/user
+// @desc    Get user data
+// @access  Private
+router.get('/user', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
   }
 });
 

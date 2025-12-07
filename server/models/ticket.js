@@ -1,92 +1,60 @@
 const mongoose = require('mongoose');
 
-// Helper function to generate the ticket number (e.g., 20251107-0000001)
-async function generateTicketNumber() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = (today.getMonth() + 1).toString().padStart(2, '0');
-  const day = today.getDate().toString().padStart(2, '0');
-  const datePrefix = `${year}${month}${day}`;
-
-  // Find the last ticket created today to increment the count
-  const lastTicket = await this.constructor
-    .findOne({ ticketNumber: new RegExp('^' + datePrefix) })
-    .sort('-createdAt'); // Sort by creation time to get the last one
-
-  let nextSeq = '0000001';
-  if (lastTicket) {
-    const lastSeq = parseInt(lastTicket.ticketNumber.split('-')[1]);
-    nextSeq = (lastSeq + 1).toString().padStart(7, '0');
-  }
-  return `${datePrefix}-${nextSeq}`;
-}
-
-const TicketIterationSchema = new mongoose.Schema({
-  comment: {
-    type: String,
-    required: true,
+const TicketSchema = new mongoose.Schema({
+  // Requirement: Unique Record Number (e.g. 20220701-0000001)
+  recordNumber: { 
+    type: String, 
+    unique: true 
   },
-  commentedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  priority: { 
+    type: String, 
+    enum: ['Low', 'Medium', 'High', 'Urgent'], 
+    default: 'Low' 
   },
-  timestamp: {
-    type: Date,
-    default: Date.now,
+  // Requirement: Status Field
+  status: { 
+    type: String, 
+    enum: ['New', 'In Progress', 'Dispatched', 'Resolved', 'Closed', 'Cancelled'], 
+    default: 'New' 
   },
-});
+  customerName: { type: String, required: true },
+  customerEmail: { type: String, required: true },
+  
+  // Requirement: Resolution field needed to close
+  resolution: { type: String, default: '' },
 
-const TicketSchema = new mongoose.Schema(
-  {
-    ticketNumber: {
-      type: String,
-      unique: true,
-    },
-    title: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    submittedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    priority: {
-      type: String,
-      enum: ['Low', 'Medium', 'High', 'Critical'],
-      default: 'Medium',
-    },
-    category: {
-      type: String,
-      required: true,
-    },
-    status: {
-      type: String,
-      enum: ['New', 'In Progress', 'Dispatched', 'Closed', 'Cancelled'],
-      default: 'New',
-    },
-    assignedTo: {  
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // This will link to an Admin user
-      default: null,
-    },
-    resolution: {
-      type: String,
-      default: '',
-    },
-    iterations: [TicketIterationSchema], // This is the audit trail
-  },
-  { timestamps: true } // Adds createdAt and updatedAt fields
-);
+  // Link to the User who submitted it
+  submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
-// Middleware to generate ticket number before saving a new ticket
-TicketSchema.pre('save', async function (next) {
-  if (this.isNew) {
-    this.ticketNumber = await generateTicketNumber.call(this);
+  // Requirement: Audit Trail / Iterations
+  iterations: [{
+    date: { type: Date, default: Date.now },
+    comment: String,
+    statusChange: String,
+    commentedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    username: String
+  }]
+}, { timestamps: true });
+
+// Auto-generate the Ticket Record Number before saving
+TicketSchema.pre('save', async function(next) {
+  if (!this.recordNumber) {
+    // Generate YYYYMMDD string
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, ""); 
+    
+    // Count tickets created today to generate the sequence
+    const count = await mongoose.model('Ticket').countDocuments({
+      createdAt: { 
+        $gte: new Date(new Date().setHours(0,0,0,0)), 
+        $lt: new Date(new Date().setHours(23,59,59,999)) 
+      }
+    });
+    
+    // Format: YYYYMMDD-000000X
+    const sequence = (count + 1).toString().padStart(7, '0'); 
+    this.recordNumber = `${dateStr}-${sequence}`;
   }
   next();
 });

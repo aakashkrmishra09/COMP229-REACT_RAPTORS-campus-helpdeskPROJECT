@@ -1,5 +1,5 @@
 const express = require('express');
-const connectDB = require('./db'); // Our db.js file
+const connectDB = require('./db');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -9,8 +9,8 @@ const app = express();
 connectDB();
 
 // Init Middleware
-app.use(cors()); // Allows cross-origin requests (for your React frontend)
-app.use(express.json()); // Allows us to accept JSON data in the body
+app.use(cors());
+app.use(express.json()); 
 
 // Define Routes
 app.use('/api/auth', require('./routes/auth'));
