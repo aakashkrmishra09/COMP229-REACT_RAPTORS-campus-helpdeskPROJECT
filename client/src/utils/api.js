@@ -2,7 +2,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api', // Points to your running backend
+  // PASTE YOUR RENDER URL HERE (Make sure to keep /api at the end)
+  baseURL: 'https://react-raptors-backend.onrender.com/api', 
   headers: {
     'Content-Type': 'application/json'
   }
