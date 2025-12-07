@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreateTicket from './pages/CreateTicket';
+// Routing structure review: potential optimization for future updates
 
 function App() {
   return (

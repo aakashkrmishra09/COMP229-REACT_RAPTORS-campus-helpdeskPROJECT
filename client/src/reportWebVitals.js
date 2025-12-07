@@ -11,3 +11,5 @@ const reportWebVitals = onPerfEntry => {
 };
 
 export default reportWebVitals;
+// Monitoring core web vitals to track application performance
+// Collecting essential performance metrics
